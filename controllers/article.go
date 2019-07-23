@@ -2,11 +2,9 @@ package controllers
 
 import (
 	"rompapi/models"
-	// "rompapi/utils"
 	"encoding/json"
 	"fmt"
 	"github.com/astaxie/beego"
-	// "time"
 )
 
 // Operations about Users
@@ -22,12 +20,29 @@ func (c *ArticleController) URLMapping() {
 // @router /add [post]
 func (c *ArticleController) AddArticle() {
 	var v models.Article
-	// user_id := "a48899f3-90e7-4c71-b9ad-bd71b77d2a2a"
-	user_id := c.GetSession("user_id").(string)
-	fmt.Println("ddd")
-	fmt.Println(user_id)
-	if err, user := models.GetUserById(user_id); err == nil {
-		v.User = user
+	var token models.Token			
+	// 用户(用token查)
+	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &token); err == nil {
+		if err, user := models.GetUserByToken(token.Token); err == nil {
+			v.User = user
+		}
+	}else{
+		c.Ctx.ResponseWriter.WriteHeader(403)
+		c.Data["json"] = Response{403, 403, fmt.Sprintf("%s", err), nil}
+		c.ServeJSON()
+		return
+	}
+	
+	// 分类
+	if err, category := models.GetCategoryById(1); err == nil {
+		if category !=nil {
+			v.Category = category
+		}else{
+			c.Ctx.ResponseWriter.WriteHeader(403)
+			c.Data["json"] = Response{403, 403, "未查找到分类数据", nil}
+			c.ServeJSON()
+			return
+		}
 	}else{
 		c.Ctx.ResponseWriter.WriteHeader(403)
 		c.Data["json"] = Response{403, 403, fmt.Sprintf("%s", err), nil}

@@ -86,13 +86,11 @@ func (c *UserController) Login() {
 			return
 		}
 		if ok, user := models.Login(v); ok{
-			// TODO-------------------------------------------
 			if ok := utils.CheckToken(user.Token); !ok{
 				token := utils.GenToken()
 				models.UpdateUserToken(&user, token)
 			}
 			c.Ctx.Output.SetStatus(201)
-			c.SetSession("user_id", user.Id)
 			c.Data["json"] = Response{200, 200,"登录成功", user}
 		} else {
 			c.Data["json"] = Response{200, 200, "密码错误", nil}

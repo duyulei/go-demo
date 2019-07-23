@@ -11,12 +11,21 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type Token struct {
+    Token  string
+}
+
+type Pagination struct {
+    Page      string
+    PageSize  string
+}
+
 func init() {
 	orm.RegisterModel(new(User))
 }
 
 type User struct {
-	Id       string `json:"id"       orm:"column(id);pk;unique;;size(128)"`
+	Id       string `json:"id"       orm:"column(id);pk;unique;size(128)"`
 	Username string `json:"username" orm:"column(username);unique;size(32)"`
 	Password string `json:"password" orm:"column(password);size(128)"`
 	Create_time  time.Time `orm:"auto_now_add;type(datetime)"`
@@ -38,6 +47,17 @@ func CheckUserId(userId string) bool {
 func CheckUserName(username string) bool {
 	exist := Users().Filter("Username", username).Exist()
 	return exist
+}
+
+// 根据token查找用户
+func GetUserByToken(token string) (err error, user *User) {
+	o := orm.NewOrm()
+	user = &User{Token: token}
+	if err := o.QueryTable(new(User)).Filter("Token", token).RelatedSel().One(user); err == nil {
+		return nil, user
+	}
+	return err, nil
+
 }
 
 // 根据用户名查找用户

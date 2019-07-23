@@ -26,7 +26,7 @@ func CheckToken(token string) bool {
 func GenToken() string {
 	claims := &jwt.StandardClaims{
 		ExpiresAt: int64(time.Now().Unix() + 1000),
-		Issuer:    "hzwy23",
+		Issuer:    "dulei",
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
